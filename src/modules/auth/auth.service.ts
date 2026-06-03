@@ -7,7 +7,7 @@ const loginUserIntoDb = async (payload: {email: string, password: string}) => {
     const { email, password } = payload;
     
     const userResult = await query('SELECT * FROM users WHERE email = $1', [email]);
-    const user = userResult.rows[0];
+    const user = userResult.rows[0];  
     
     if (!user) {
         throw new AppError("Invalid credentials", 401); 
@@ -30,15 +30,17 @@ const loginUserIntoDb = async (payload: {email: string, password: string}) => {
         process.env.JWT_SECRET || 'fallback_secret', 
         { expiresIn: '1d' }
     );
-    
+
     return {
+        token: accessToken, 
         user: {
             id: user.id,
             name: user.name,
             email: user.email,
-            role: user.role
-        },
-        token: accessToken
+            role: user.role,
+            created_at: user.created_at, 
+            updated_at: user.updated_at  
+        }
     };
 }
 
