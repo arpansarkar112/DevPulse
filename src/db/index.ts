@@ -1,7 +1,7 @@
 import { Pool } from "pg";
 import config from "../config"; 
 
-type QueryValue = string | number | boolean | null | Date;
+type QueryValue = string | number | boolean | null | Date | (string | number)[];
 
 export const pool = new Pool({
     connectionString: config.connection_string

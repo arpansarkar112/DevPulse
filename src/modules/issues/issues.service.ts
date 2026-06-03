@@ -13,8 +13,31 @@ const createIssueIntoDb = async (payload: IIssue) => {
 };
 
 const getAllIssuesFromDb = async () => {
-    const result = await query('SELECT * FROM issues');
-    return result.rows;
+    const issuesResult = await query('SELECT * FROM issues');
+    const issues = issuesResult.rows;
+
+    if (issues.length === 0) return [];
+
+    const reporterIds = [...new Set(issues.map(issue => issue.reporter_id))];
+    const usersResult = await query(
+        'SELECT id, name, role FROM users WHERE id = ANY($1)',
+        [reporterIds]
+    );
+    const users = usersResult.rows;
+
+    const formattedIssues = issues.map(issue => {
+        
+        const matchedUser = users.find(user => user.id === issue.reporter_id);
+
+        const { reporter_id, ...issueData } = issue;
+
+        return {
+            ...issueData,
+            reporter: matchedUser 
+        };
+    });
+
+    return formattedIssues;
 };
 
 const getSingleIssueFromDb = async (id: string) => {
