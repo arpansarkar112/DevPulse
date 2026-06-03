@@ -22,7 +22,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
 
         sendResponse(res, {
             statusCode: 200,
-            message: "User logged in successfully",
+            message: "Login successful",
             data: result
         });
     } catch (error) {

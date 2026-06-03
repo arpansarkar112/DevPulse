@@ -2,10 +2,11 @@ import type { Request, Response, NextFunction } from "express";
 import { userService } from "../user/user.service";
 import sendResponse from "../../utility/response";
 import { AppError } from "../../middleware/globalErrorHandler";
+import type { IUserQuery } from "./user.interface";
 
 const getAllUsers = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const users = await userService.getAllUsersFromDb();
+        const users = await userService.getAllUsersFromDb(req.query as IUserQuery);
         sendResponse(res, {
             statusCode: 200,
             message: "Users retrieved successfully",

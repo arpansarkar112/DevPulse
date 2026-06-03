@@ -1,4 +1,4 @@
-import express, { type Application, type Request, type Response } from "express";
+import express, { type Application, type Request, type Response, type NextFunction } from "express";
 import cors from "cors";
 import globalErrorHandler from "./middleware/globalErrorHandler";
 import { issuesRoute } from "./modules/issues/issues.route";
@@ -22,6 +22,19 @@ app.get("/", (req: Request, res: Response) => {
 app.use('/api/issues', issuesRoute);
 app.use('/api/users', userRoute);
 app.use('/api/auth', authRoute);
+
+app.use((req: Request, res: Response, next: NextFunction) => {
+    res.status(404).json({
+        success: false,
+        message: "Not Found",
+        errorMessages: [
+            {
+                path: req.originalUrl,
+                message: "The requested API route does not exist"
+            }
+        ]
+    });
+});
 
 app.use(globalErrorHandler);
 

@@ -1,5 +1,5 @@
 import { query } from "../../db";
-import type { IUser } from "./user.interface";
+import type { IUser, IUserQuery } from "./user.interface";
 import bcrypt from "bcrypt";
 import { AppError } from "../../middleware/globalErrorHandler";
 
@@ -24,10 +24,40 @@ const createUserIntoDb = async (payload: IUser) => {
     return result.rows[0];
 };
 
-const getAllUsersFromDb = async () => {
-    const result = await query(
-        'SELECT id, name, email, role, created_at, updated_at FROM users'
-    );
+const getAllUsersFromDb = async (queryPayload: IUserQuery) => {
+    const sort = queryPayload.sort ?? 'newest';
+    const role = queryPayload.role;
+    const page = parseInt(queryPayload.page as string) || 1;
+    const limit = parseInt(queryPayload.limit as string) || 10;
+    const offset = (page - 1) * limit;
+
+    if (sort && !['newest', 'oldest'].includes(sort)) {
+        throw new AppError("Invalid sort value. Use 'newest' or 'oldest'.", 400);
+    }
+
+    if (role && !['contributor', 'maintainer'].includes(role)) {
+        throw new AppError("Invalid role value. Use 'contributor' or 'maintainer'.", 400);
+    }
+
+    let sqlString = 'SELECT id, name, email, role, created_at, updated_at FROM users WHERE 1=1';
+    const sqlValues: Array<string | number | boolean | null | Date> = [];
+
+    if (role) {
+        sqlValues.push(role);
+        sqlString += ` AND role = $${sqlValues.length}`;
+    }
+
+    sqlString += sort === 'oldest'
+        ? ' ORDER BY created_at ASC'
+        : ' ORDER BY created_at DESC';
+
+    sqlValues.push(limit);
+    sqlString += ` LIMIT $${sqlValues.length}`;
+
+    sqlValues.push(offset);
+    sqlString += ` OFFSET $${sqlValues.length}`;
+
+    const result = await query(sqlString, sqlValues);
     return result.rows;
 };
 

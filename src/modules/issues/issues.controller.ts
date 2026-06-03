@@ -2,6 +2,7 @@ import type { Request, Response, NextFunction } from "express";
 import { issuesService } from "./issues.service";
 import sendResponse from "../../utility/response";
 import { AppError } from "../../middleware/globalErrorHandler";
+import type { IIssueQuery } from "./issues.interface";
 
 const createIssue = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -27,7 +28,7 @@ const createIssue = async (req: Request, res: Response, next: NextFunction) => {
 
 const getAllIssues = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const result = await issuesService.getAllIssuesFromDb();
+        const result = await issuesService.getAllIssuesFromDb(req.query as IIssueQuery);
         
         sendResponse(res, {
             statusCode: 200,
@@ -58,8 +59,40 @@ const getSingleIssue = async (req: Request, res: Response, next: NextFunction) =
     }
 };
 
+const updateIssue = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+        const updatedIssue = await issuesService.updateIssueIntoDb(id as string, req.body, req.user);
+
+        sendResponse(res, {
+            statusCode: 200,
+            message: "Issue updated successfully",
+            data: updatedIssue
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+const deleteIssue = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+        await issuesService.deleteIssueFromDb(id as string);
+
+        sendResponse(res, {
+            statusCode: 200,
+            message: "Issue deleted successfully",
+            data: null
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 export const issuesController = {
     createIssue,
     getAllIssues,
-    getSingleIssue
+    getSingleIssue,
+    updateIssue,
+    deleteIssue
 };

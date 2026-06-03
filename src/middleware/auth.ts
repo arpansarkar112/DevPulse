@@ -1,8 +1,8 @@
 import type { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import type { JwtPayload } from "jsonwebtoken";
 import { query } from "../db";
 import { AppError } from "./globalErrorHandler"; 
+import type { JwtPayload as AppJwtPayload } from "../types";
 
 type Role = 'contributor' | 'maintainer';
 
@@ -20,11 +20,11 @@ const auth = (...roles: Role[]) => {
             const decoded = jwt.verify(
                 token as string, 
                 process.env.JWT_SECRET as string || 'fallback_secret'
-            ) as JwtPayload;
+            ) as AppJwtPayload;
 
             const userData = await query(
-                'SELECT id, email, role FROM users WHERE email = $1', 
-                [decoded.email]
+                'SELECT id, name, role FROM users WHERE id = $1', 
+                [decoded.id]
             );
             const user = userData.rows[0];
 
@@ -36,7 +36,7 @@ const auth = (...roles: Role[]) => {
                 throw new AppError("Forbidden! You do not have required permissions.", 403);
             }
 
-            req.user = decoded;
+            req.user = user;
 
             next();
         } catch (error) {
