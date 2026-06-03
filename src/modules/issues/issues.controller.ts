@@ -5,15 +5,23 @@ import { AppError } from "../../middleware/globalErrorHandler";
 
 const createIssue = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const result = await issuesService.createIssueIntoDb(req.body);
-        
+        const reporter_id = req.user?.id;
+
+        const secureIssuePayload = {
+            ...req.body,
+            reporter_id: reporter_id 
+        };
+
+        const result = await issuesService.createIssueIntoDb(secureIssuePayload);
+
         sendResponse(res, {
             statusCode: 201,
             message: "Issue created successfully",
             data: result
-        });
-    } catch (error) {
-        next(error); 
+        });     
+    }
+    catch (error) {
+        next(error);
     }
 };
 
