@@ -119,9 +119,9 @@ const updateIssueIntoDb = async (
         throw new AppError("Issue not found", 404);
     }
 
-    console.log("Database ID", existingIssue.reporter_id);
-    console.log("Token ID", actor.id);
-    console.log("equal?:", Number(existingIssue.reporter_id) === Number(actor.id));
+    // console.log("Database ID", existingIssue.reporter_id);
+    // console.log("Token ID", actor.id);
+    // console.log("equal?:", Number(existingIssue.reporter_id) === Number(actor.id));
 
 
     const isMaintainer = actor.role === 'maintainer';
