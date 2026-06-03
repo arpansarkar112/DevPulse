@@ -1,21 +1,78 @@
 import type { Request, Response, NextFunction } from "express";
 import { userService } from "../user/user.service";
 import sendResponse from "../../utility/response";
+import { AppError } from "../../middleware/globalErrorHandler";
 
-const register = async (req: Request, res: Response, next: NextFunction) => {
+const getAllUsers = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const result = await userService.createUserIntoDb(req.body);
-    
+        const users = await userService.getAllUsersFromDb();
         sendResponse(res, {
-            statusCode: 201,
-            message: "User registered successfully",
-            data: result
+            statusCode: 200,
+            message: "Users retrieved successfully",
+            data: users
         });
     } catch (error) {
-        next(error); 
+        next(error);
     }
 };
 
-export const authController = {
-    register
+const getSingleUser = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const user = await userService.getSingleUserFromDb(req.params.id as string);
+        
+        if (!user) {
+            throw new AppError("User not found", 404);
+        }
+
+        sendResponse(res, {
+            statusCode: 200,
+            message: "User retrieved successfully",
+            data: user
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+const updateUser = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const updatedUser = await userService.updateUserIntoDb(req.body, req.params.id as string);
+        
+        if (!updatedUser) {
+            throw new AppError("User not found", 404);
+        }
+
+        sendResponse(res, {
+            statusCode: 200,
+            message: "User updated successfully",
+            data: updatedUser
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const result = await userService.deleteUserFromDb(req.params.id as string);
+        
+        if (result.rowCount === 0) {
+            throw new AppError("User not found", 404);
+        }
+
+        sendResponse(res, {
+            statusCode: 200,
+            message: "User deleted successfully",
+            data: null
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const userController = {
+    getAllUsers,
+    getSingleUser,
+    updateUser,
+    deleteUser
 };

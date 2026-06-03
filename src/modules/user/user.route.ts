@@ -1,14 +1,11 @@
 import { Router } from "express";
-import type { Request, Response } from "express";
+import { userController } from "./user.controller";
 
 const router = Router();
 
-router.post('/register', (req: Request, res: Response) => {
-    res.status(200).json({
-        success: true,
-        message: "The register route is successfully connected!",
-        receivedData: req.body 
-    });
-});
+router.get('/', userController.getAllUsers);
+router.get('/:id', userController.getSingleUser);
+router.put('/:id', userController.updateUser);
+router.delete('/:id', userController.deleteUser);
 
 export const userRoute = router;

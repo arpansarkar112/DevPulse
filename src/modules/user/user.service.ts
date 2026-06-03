@@ -24,6 +24,47 @@ const createUserIntoDb = async (payload: IUser) => {
     return result.rows[0];
 };
 
+const getAllUsersFromDb = async () => {
+    const result = await query(
+        'SELECT id, name, email, role, created_at, updated_at FROM users'
+    );
+    return result.rows;
+};
+
+const getSingleUserFromDb = async (id: string) => {
+    const result = await query(
+        'SELECT id, name, email, role, created_at, updated_at FROM users WHERE id = $1',
+        [id]
+    );
+    return result.rows[0];
+};
+
+const updateUserIntoDb = async (payload: Partial<IUser>, id: string) => {
+    const { name, role } = payload;
+    
+
+    const result = await query(
+        `UPDATE users 
+         SET name = COALESCE($1, name), 
+             role = COALESCE($2, role),
+             updated_at = CURRENT_TIMESTAMP
+         WHERE id = $3 
+         RETURNING id, name, email, role, created_at, updated_at`, 
+        [name ?? null, role ?? null, id]
+    );
+    
+    return result.rows[0];
+};
+
+const deleteUserFromDb = async (id: string) => {
+    const result = await query('DELETE FROM users WHERE id = $1 RETURNING id', [id]);
+    return result;
+};
+
 export const userService = {
-    createUserIntoDb
+    createUserIntoDb, 
+    getAllUsersFromDb,
+    getSingleUserFromDb,
+    updateUserIntoDb,
+    deleteUserFromDb
 };
