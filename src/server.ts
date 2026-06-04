@@ -4,9 +4,14 @@ import { initDB } from "./db";
 
 const main = async () => {
     await initDB();
-    app.listen(config.port, () => {
-    console.log(`Example app listening on port ${config.port}`)
-});
+    
+    if (process.env.NODE_ENV !== "production") {
+        app.listen(config.port, () => {
+            console.log(`Example app listening on port ${config.port}`)
+        });
+    }
 }
 
-main()
+main();
+
+export default app;
